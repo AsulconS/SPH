@@ -3,6 +3,8 @@ out vec4 FragColor;
 
 in vec3 color;
 
+uniform vec3 colorDepth;
+
 void main()
 {
     vec2 circCoord = 8.0f * gl_PointCoord - 1.0f;
@@ -10,5 +12,5 @@ void main()
     {
         discard;
     }
-    FragColor = vec4(color, 1.0f);
+    FragColor = vec4(colorDepth * color, 1.0f);
 }

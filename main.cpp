@@ -3,8 +3,6 @@
 
 #include <random>
 
-#define SCALE_FACTOR 10.0f
-
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 struct SIM_State
 {
@@ -37,17 +35,17 @@ struct SIM_State
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 float W(const float q, const float h)
 {
-    return (315.0f * q) / (65.0f * gil::constants::PI * pow(h, 9.0f));
+    return q * 315.0f / (65.0f * gil::constants::PI * pow(h, 9.0f));
 }
 
 float W1(const float q, const float h)
 {
-    return (-45.0f * q) / (gil::constants::PI * pow(h, 6.0f));
+    return q * -45.0f / (gil::constants::PI * pow(h, 6.0f));
 }
 
 float W2(const float q, const float h)
 {
-    return (45.0f * q) / (gil::constants::PI * pow(h, 6.0f));
+    return q * 45.0f / (gil::constants::PI * pow(h, 6.0f));
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -60,7 +58,7 @@ void eulerIntegrate(const SIM_State& sim, const float step)
     {
         Particle& pi = sim.particles[i];
 
-        pi.v += step * pi.f / pi.density;
+        pi.v += step * pi.f / sim.mass;
         pi.r += step * pi.v;
 
         if(pi.r.x - sim.margin < 0.0f)
@@ -111,12 +109,11 @@ void initGLParams(const SIM_State& sim, gil::RenderingWindow& window, gil::Shade
     glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
     shader.setFloat("pointSize", 32.0f);
 
-    glm::vec3 viewPos {8.0f, 16.0f, 32.0f};
+    glm::vec3 viewPos {128.0f, 128.0f, 256.0f};
     glm::mat4 view = glm::lookAt(viewPos, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
     glm::mat4 projection = glm::perspective(45.0f, window.getAspectRatio(), 0.1f, 1000.0f);
     shader.setMat4("view", view);
     shader.setMat4("projection", projection);
-    shader.setVec3("particleColor", {1.0f, 0.13f, 0.0f});
 }
 
 void initSPH(SIM_State& sim)
@@ -135,9 +132,9 @@ void initSPH(SIM_State& sim)
 				sim.particles[p].r = pos;
                 sim.particles[p].v = {8.0f, 32.0f, 8.0f};
                 sim.particles[p].color = {1.0f, 0.13f, 0.0f};
-                sim.vertexData[p * 3 + 0] = 1.0f;
-                sim.vertexData[p * 3 + 1] = 0.13f;
-                sim.vertexData[p * 3 + 2] = 0.0f;
+                sim.vertexData[p * 3 + 3] = 1.0f;
+                sim.vertexData[p * 3 + 4] = 0.13f;
+                sim.vertexData[p * 3 + 5] = 0.0f;
                 ++p;
 			}
 		}
@@ -150,14 +147,14 @@ void initSPH(SIM_State& sim)
     glBindVertexArray(sim.VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, sim.VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(sim.vertexData), sim.vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * sim.nParticles * sizeof(float), sim.vertexData, GL_STATIC_DRAW);
 
     // Position Attrib
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     // Particle Color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
@@ -184,10 +181,10 @@ int main()
     sim.h2 = sim.h * sim.h;
 
     sim.mass = 64.0f;
-    sim.viscosity = 2500.0f;
+    sim.viscosity = 250.0f;
 
     sim.margin = sim.h;
-    sim.damping = -0.125f;
+    sim.damping = -0.5f;
     sim.boundaryWidth = 160.0f;
     sim.boundaryHeight = 160.0f;
     sim.boundaryDepth = 160.0f;
@@ -223,7 +220,7 @@ int main()
                 }
                 // ^ This makes it better (I don't know why profe :'v) ...sim.mass * W(r, sim.h)... antigua version
             }
-            pi.density += 64.0f;
+            //pi.density += 64.0f;
             pi.pressure = sim.gasConstant * (sim.particles[i].density - sim.density);
             // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         }
@@ -255,7 +252,7 @@ int main()
                 }
             }
 
-            gil::Vec3f g {0.0f, -gil::constants::GAL, 0.0f};
+            gil::Vec3f g {0.0f, -gil::constants::GAL * 12000, 0.0f};
             gil::Vec3f fg {g * pi.density};
             pi.f = fp + fv + fg;
         }
@@ -279,8 +276,11 @@ int main()
             Particle& pi = sim.particles[i];
 
             model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3{pi.r.x / SCALE_FACTOR, pi.r.y / SCALE_FACTOR, pi.r.z / SCALE_FACTOR});
+            model = glm::translate(model, glm::vec3{pi.r.x, pi.r.y, pi.r.z});
             shader.setMat4("model", model);
+
+            float zColorDepth {1.0f - (pi.r.z / sim.boundaryDepth)};
+            shader.setVec3("colorDepth", {zColorDepth, zColorDepth, zColorDepth});
 
             glBindVertexArray(sim.VAO);
                 glDrawArrays(GL_POINTS, 0, sim.nParticles);
