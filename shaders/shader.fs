@@ -12,5 +12,12 @@ void main()
     {
         discard;
     }
-    FragColor = vec4(colorDepth * color, 1.0f);
+    if(dot(circCoord, circCoord) > 0.5f)
+    {
+        FragColor = vec4(0.5f, 0.0f, 0.0f, 1.0f);
+    }
+    else
+    {
+        FragColor = vec4(colorDepth * color, 1.0f);
+    }
 }
