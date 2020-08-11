@@ -184,9 +184,9 @@ int main()
 
     sim.margin = sim.supportRadius;
     sim.damping = -0.5f;
-    sim.boundaryWidth = 0.6f;
-    sim.boundaryHeight = 0.6f;
-    sim.boundaryDepth = 0.6f;
+    sim.boundaryWidth = 0.5f;
+    sim.boundaryHeight = 0.5f;
+    sim.boundaryDepth = 0.5f;
 
     initSPH(sim);
 
