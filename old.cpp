@@ -140,7 +140,6 @@ void initSPH(SIM_State& sim)
 			{
 				sim.particles[p].r = pos;
                 sim.particles[p].v = {0.0f, 32.0f, 0.0f};
-                sim.particles[p].color = {1.0f, 0.13f, 0.0f};
                 sim.vertexData[p * 3 + 3] = 1.0f;
                 sim.vertexData[p * 3 + 4] = 0.13f;
                 sim.vertexData[p * 3 + 5] = 0.0f;

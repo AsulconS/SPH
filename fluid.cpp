@@ -64,30 +64,6 @@ float viscosityLaplacianKernel(const gil::Vec3f r, const float h)
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Volcano Equations
-// ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-float f(const float x, const float y)
-{
-    return (sin(2.0f * sqrt(SQD(x) + SQD(y))) / sqrt(SQD(x) + SQD(y))) - 2.0f;
-}
-
-float fx(const float x, const float y)
-{
-    return (2.0f * x * cos(2.0f * sqrt(SQD(x) + SQD(y))) * sqrt(SQD(x) + SQD(y)) - x * sin(2.0f * sqrt(SQD(x) + SQD(y)))) / ((SQD(x) + SQD(y)) * sqrt(SQD(x) + SQD(y)));
-}
-
-float fy(const float x, const float y)
-{
-    return (2.0f * y * cos(2.0f * sqrt(SQD(x) + SQD(y))) * sqrt(SQD(x) + SQD(y)) - y * sin(2.0f * sqrt(SQD(x) + SQD(y)))) / ((SQD(x) + SQD(y)) * sqrt(SQD(x) + SQD(y)));
-}
-
-float f3(const float x, const float y)
-{
-    return 2.0f * (sin(pow(e, fabs(x))) + sin(pow(e, fabs(y)) / 2.0f)) / (pow(e, fabs(x)) + pow(e, fabs(y))) - 2.0f;
-}
-// ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Leap-Frog Solver
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 void leapFrogIntegrate(SIM_State& sim)
@@ -99,59 +75,6 @@ void leapFrogIntegrate(SIM_State& sim)
         pi.v += sim.timeStep * pi.f / pi.density;
         pi.r += sim.timeStep * pi.v;
 
-        // Dumping Method
-/*
-        if(pi.r.y - sim.margin < f(pi.r.z, pi.r.x))
-        {
-            pi.v.y *= sim.damping;
-            pi.r.y = f(pi.r.z, pi.r.x);
-        }
-*/
-
-        // Venom Method
-/*
-        if(pi.r.y - sim.margin < f(pi.r.z, pi.r.x))
-        {
-            float d {2.0f};
-            glm::vec3 A  {pi.r.z, pi.r.x, pi.r.y};
-            glm::vec3 Ax {A.x + d, A.y, d * fx(A.x, A.y)};
-            glm::vec3 Ay {A.x, A.y + d, d * fy(A.x, A.y)};
-            glm::vec3 Dp {glm::normalize(glm::cross(Ax - A, Ay - A))};
-
-            pi.v += gil::Vec3f{Dp.y, Dp.z, Dp.x} * sim.damping;
-            pi.r.y = f(pi.r.z, pi.r.x) + sim.margin;
-        }
-*/
-
-        // Perpendicular Method
-/*
-        if(pi.r.y - sim.margin < f(pi.r.z, pi.r.x))
-        {
-            float d {2.0f};
-            glm::vec3 A  {pi.r.z, pi.r.x, pi.r.y};
-            glm::vec3 Ax {A.x + d, A.y, d * fx(A.x, A.y)};
-            glm::vec3 Ay {A.x, A.y + d, d * fy(A.x, A.y)};
-            glm::vec3 Dp {glm::normalize(glm::cross(Ay - A, Ax - A))};
-
-            pi.v = gil::Vec3f{Dp.y, Dp.z, Dp.x} * sim.damping;
-            pi.r.y = f(pi.r.z, pi.r.x) + sim.margin;
-        }
-*/
-
-        // Gradient Method
-
-        if(pi.r.y - sim.margin < f(pi.r.z, pi.r.x))
-        {
-            float d {2.0f};
-            gil::Vec3f gradientVector {fy(pi.r.z, pi.r.x), 0.0f, fx(pi.r.z, pi.r.x)};
-
-            pi.v += gil::normalize(gradientVector) * sim.damping;
-            pi.r.y = f(pi.r.z, pi.r.x) + sim.margin;
-        }
-
-
-        // Box Method
-/*
         if(pi.r.x - sim.margin < 0.0f)
         {
             pi.v.x *= sim.damping;
@@ -182,7 +105,6 @@ void leapFrogIntegrate(SIM_State& sim)
             pi.v.z *= sim.damping;
             pi.r.z = sim.boundaryDepth - sim.margin;
         }
-*/
     }
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -284,7 +206,7 @@ int main()
     SIM_State sim;
 
     sim.timeStep = 0.01f;
-    sim.restDensity = 3000.29f;
+    sim.restDensity = 998.29f;
     sim.mass = 0.02f;
     sim.viscosity = 3.5f;
     sim.surfaceTension = 0.0728f;
@@ -295,18 +217,16 @@ int main()
 
     sim.margin = sim.supportRadius;
     sim.damping = -0.5f;
-    sim.boundaryWidth = 0.65f;
-    sim.boundaryHeight = 0.65f;
-    sim.boundaryDepth = 0.65f;
+    sim.boundaryWidth = 0.6f;
+    sim.boundaryHeight = 0.6f;
+    sim.boundaryDepth = 0.6f;
 
     initSPH(sim);
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
     gil::Timer timer(true);
 
-    //glm::vec3 viewPos {1.0f, 1.0f, 2.0f};
-    //glm::vec3 viewPos {0.4f, 0.8f, 1.6f};
-    glm::vec3 viewPos {4.0f, 8.0f, 16.0f};
+    glm::vec3 viewPos {0.4f, 0.8f, 1.6f};
 
     gil::Shader shader("shader");
     gil::Shader volcanoShader("volcano");
@@ -406,12 +326,6 @@ int main()
         glm::vec4 nvp4 = glm::rotate(glm::mat4(1.0f), yRotationAngle, glm::vec3{0.0f, 1.0f, 0.0f}) * glm::vec4{viewPos.x, viewPos.y, viewPos.z, 1.0f};
         glm::vec3 nvp3 = {nvp4.x, nvp4.y, nvp4.z};
         view = glm::lookAt(nvp3, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
-
-        model = glm::translate(glm::mat4(1.0f), volcanoPos);
-        volcanoShader.use();
-        volcanoShader.setMat4("view", view);
-        volcanoShader.setMat4("model", model);
-        volcano.draw(volcanoShader);
 
         shader.use();
         shader.setMat4("view", view);
