@@ -11,7 +11,7 @@ struct Particle
 
     float density;
     float pressure;
-    gil::Vec3f color;
+    float color;
 };
 
 #endif // PARTICLE_HPP

@@ -20,7 +20,10 @@ struct SIM_State
     float restDensity;
     float mass;
     float viscosity;
+    float surfaceTension;
+    float threshold;
     float gasStiffness;
+    float restitution;
     float supportRadius;
 
     float damping;
@@ -36,7 +39,17 @@ struct SIM_State
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 float poly6DefaultKernel(const gil::Vec3f r, const float h)
 {
-    return (315.0f / (64.0f * gil::constants::PI * pow(h, 9.0f))) * pow(h * h - SQD(gil::module(r)), 3.0f);
+    return (315.0f / (64.0f * gil::constants::PI * pow(h, 9.0f))) * pow(SQD(h) - SQD(gil::module(r)), 3.0f);
+}
+
+gil::Vec3f poly6GradientKernel(const gil::Vec3f r, const float h)
+{
+    return -(945.0f / (32.0f * gil::constants::PI * pow(h, 9.0f))) * r * SQD(SQD(h) - SQD(gil::module(r)));
+}
+
+float poly6LaplacianKernel(const gil::Vec3f r, const float h)
+{
+    return -(945.0f / (32.0f * gil::constants::PI * pow(h, 9.0f))) * (SQD(h) - SQD(gil::module(r))) * (3.0f * SQD(h) - 7.0f * SQD(gil::module(r)));
 }
 
 gil::Vec3f spikyGradientKernel(const gil::Vec3f r, const float h)
@@ -75,9 +88,9 @@ float f3(const float x, const float y)
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Euler Solver
+// Leap-Frog Solver
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-void eulerIntegrate(SIM_State& sim)
+void leapFrogIntegrate(SIM_State& sim)
 {
     for(unsigned int i = 0; i < sim.particles.size(); ++i)
     {
@@ -87,16 +100,16 @@ void eulerIntegrate(SIM_State& sim)
         pi.r += sim.timeStep * pi.v;
 
         // Dumping Method
-        /*
+/*
         if(pi.r.y - sim.margin < f(pi.r.z, pi.r.x))
         {
             pi.v.y *= sim.damping;
             pi.r.y = f(pi.r.z, pi.r.x);
         }
-        */
+*/
 
         // Venom Method
-        /*
+/*
         if(pi.r.y - sim.margin < f(pi.r.z, pi.r.x))
         {
             float d {2.0f};
@@ -108,10 +121,10 @@ void eulerIntegrate(SIM_State& sim)
             pi.v += gil::Vec3f{Dp.y, Dp.z, Dp.x} * sim.damping;
             pi.r.y = f(pi.r.z, pi.r.x) + sim.margin;
         }
-        */
+*/
 
         // Perpendicular Method
-        /*
+/*
         if(pi.r.y - sim.margin < f(pi.r.z, pi.r.x))
         {
             float d {2.0f};
@@ -123,22 +136,22 @@ void eulerIntegrate(SIM_State& sim)
             pi.v = gil::Vec3f{Dp.y, Dp.z, Dp.x} * sim.damping;
             pi.r.y = f(pi.r.z, pi.r.x) + sim.margin;
         }
-        */
+*/
 
         // Gradient Method
-        /*
+
         if(pi.r.y - sim.margin < f(pi.r.z, pi.r.x))
         {
             float d {2.0f};
             gil::Vec3f gradientVector {fy(pi.r.z, pi.r.x), 0.0f, fx(pi.r.z, pi.r.x)};
 
-            pi.v = gil::normalize(gradientVector) * sim.damping;
+            pi.v += gil::normalize(gradientVector) * sim.damping;
             pi.r.y = f(pi.r.z, pi.r.x) + sim.margin;
         }
-        */
+
 
         // Box Method
-
+/*
         if(pi.r.x - sim.margin < 0.0f)
         {
             pi.v.x *= sim.damping;
@@ -169,7 +182,7 @@ void eulerIntegrate(SIM_State& sim)
             pi.v.z *= sim.damping;
             pi.r.z = sim.boundaryDepth - sim.margin;
         }
-
+*/
     }
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -209,7 +222,6 @@ void initSPH(SIM_State& sim)
 			{
 				p.r = pos;
                 p.v = {0.0f, 0.0f, 0.0f};
-                p.color = {1.0f, 0.13f, 0.0f};
                 sim.particles.push_back(std::move(p));
 
                 // Positions
@@ -223,9 +235,9 @@ void initSPH(SIM_State& sim)
 			}
 		}
 	}
-    sim.boundaryWidth  *= 2.0f;
-    sim.boundaryHeight *= 2.0f;
-    sim.boundaryDepth  *= 2.0f;
+    sim.boundaryWidth  *= 0.6f;
+    sim.boundaryHeight *= 0.6f;
+    sim.boundaryDepth  *= 0.6f;
     sim.stride = 6;
 
     glGenVertexArrays(1, &sim.VAO);
@@ -266,7 +278,7 @@ int main()
 
     window.setEventHandler(eventHandler);
 
-    float yRotationAngle  {0};
+    float yRotationAngle  {0.0f};
     float yRotationWeight {1.0f};
 
     SIM_State sim;
@@ -275,14 +287,17 @@ int main()
     sim.restDensity = 998.29f;
     sim.mass = 0.02f;
     sim.viscosity = 3.5f;
+    sim.surfaceTension = 0.0728f;
+    sim.threshold = 7.065f;
     sim.gasStiffness = 3.0f;
+    sim.restitution = 0.0f;
     sim.supportRadius = 0.0457f;
 
     sim.margin = sim.supportRadius;
-    sim.damping = -0.5f;
-    sim.boundaryWidth = 0.5f;
-    sim.boundaryHeight = 0.5f;
-    sim.boundaryDepth = 0.5f;
+    sim.damping = -0.6f;
+    sim.boundaryWidth = 0.6f;
+    sim.boundaryHeight = 0.6f;
+    sim.boundaryDepth = 0.6f;
 
     initSPH(sim);
 
@@ -290,8 +305,8 @@ int main()
     gil::Timer timer(true);
 
     //glm::vec3 viewPos {1.0f, 1.0f, 2.0f};
-    glm::vec3 viewPos {0.4f, 0.8f, 1.6f};
-    //glm::vec3 viewPos {4.0f, 8.0f, 16.0f};
+    //glm::vec3 viewPos {0.4f, 0.8f, 1.6f};
+    glm::vec3 viewPos {4.0f, 8.0f, 16.0f};
 
     gil::Shader shader("shader");
     gil::Shader volcanoShader("volcano");
@@ -336,7 +351,11 @@ int main()
 
             gil::Vec3f pressureForce  {0.0f, 0.0f, 0.0f};
             gil::Vec3f viscosityForce {0.0f, 0.0f, 0.0f};
+            gil::Vec3f sfTensionForce {0.0f, 0.0f, 0.0f};
             gil::Vec3f gravityForce   {0.0f, -gil::constants::GAL, 0.0f};
+
+            float colorLaplacian {0.0f};
+            gil::Vec3f surfaceNormal {0.0f, 0.0f, 0.0f};
 
             for(unsigned int j = 0; j < sim.particles.size(); ++j)
             {
@@ -352,19 +371,26 @@ int main()
                 {
                     pressureForce  += ((pi.pressure / SQD(pi.density)) + (pj.pressure / SQD(pj.density))) * sim.mass * spikyGradientKernel(r, sim.supportRadius);
                     viscosityForce += (pj.v - pi.v) * (sim.mass / pj.density) * viscosityLaplacianKernel(r, sim.supportRadius);
+                    surfaceNormal  += (sim.mass / pj.density) * poly6GradientKernel(r, sim.supportRadius);
+                    colorLaplacian += (sim.mass / pj.density) * poly6LaplacianKernel(r, sim.supportRadius);
                 }
             }
             pressureForce  *= -pi.density;
             viscosityForce *= sim.viscosity;
             gravityForce *= sim.restDensity;
-            pi.f = pressureForce + viscosityForce + gravityForce;
+
+            if(gil::module(surfaceNormal) >= sim.threshold)
+            {
+                sfTensionForce = -sim.surfaceTension * colorLaplacian * gil::normalize(surfaceNormal);
+            }
+            pi.f = pressureForce + viscosityForce + gravityForce + sfTensionForce;
         }
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         // Integrate by Euler 1th Order
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-        eulerIntegrate(sim);
+        leapFrogIntegrate(sim);
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------

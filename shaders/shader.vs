@@ -8,7 +8,7 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-#define pointSize 8.0f
+#define pointSize 16.0f
 
 void main()
 {
