@@ -4,6 +4,9 @@
 
 #include <particle.hpp>
 
+#define SQD(v) pow(v, 2.0f)
+#define e gil::constants::E
+
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 struct SIM_State
 {
@@ -11,7 +14,6 @@ struct SIM_State
     GLuint VBO;
     GLuint stride;
     std::vector<float> vertexData;
-
     std::vector<Particle> particles;
 
     float timeStep;
@@ -34,17 +36,41 @@ struct SIM_State
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 float poly6DefaultKernel(const gil::Vec3f r, const float h)
 {
-    return (315.0f / (64.0f * gil::constants::PI * pow(h, 9.0f))) * pow(h * h - pow(gil::module(r), 2.0f), 3.0f);
+    return (315.0f / (64.0f * gil::constants::PI * pow(h, 9.0f))) * pow(h * h - SQD(gil::module(r)), 3.0f);
 }
 
 gil::Vec3f spikyGradientKernel(const gil::Vec3f r, const float h)
 {
-    return (-45.0f / (gil::constants::PI * pow(h, 6.0f))) * gil::normalize(r) * pow(h - gil::module(r), 2.0f);
+    return (-45.0f / (gil::constants::PI * pow(h, 6.0f))) * gil::normalize(r) * SQD(h - gil::module(r));
 }
 
 float viscosityLaplacianKernel(const gil::Vec3f r, const float h)
 {
     return (45.0f / (gil::constants::PI * pow(h, 6.0f))) * (h - gil::module(r));
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Volcano Equations
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+float f(const float x, const float y)
+{
+    return (sin(2.0f * sqrt(SQD(x) + SQD(y))) / sqrt(SQD(x) + SQD(y))) - 2.0f;
+}
+
+float fx(const float x, const float y)
+{
+    return (2.0f * x * cos(2.0f * sqrt(SQD(x) + SQD(y))) * sqrt(SQD(x) + SQD(y)) - x * sin(2.0f * sqrt(SQD(x) + SQD(y)))) / ((SQD(x) + SQD(y)) * sqrt(SQD(x) + SQD(y)));
+}
+
+float fy(const float x, const float y)
+{
+    return (2.0f * y * cos(2.0f * sqrt(SQD(x) + SQD(y))) * sqrt(SQD(x) + SQD(y)) - y * sin(2.0f * sqrt(SQD(x) + SQD(y)))) / ((SQD(x) + SQD(y)) * sqrt(SQD(x) + SQD(y)));
+}
+
+float f3(const float x, const float y)
+{
+    return 2.0f * (sin(pow(e, fabs(x))) + sin(pow(e, fabs(y)) / 2.0f)) / (pow(e, fabs(x)) + pow(e, fabs(y))) - 2.0f;
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -59,6 +85,59 @@ void eulerIntegrate(SIM_State& sim)
 
         pi.v += sim.timeStep * pi.f / pi.density;
         pi.r += sim.timeStep * pi.v;
+
+        // Dumping Method
+        /*
+        if(pi.r.y - sim.margin < f(pi.r.z, pi.r.x))
+        {
+            pi.v.y *= sim.damping;
+            pi.r.y = f(pi.r.z, pi.r.x);
+        }
+        */
+
+        // Venom Method
+        /*
+        if(pi.r.y - sim.margin < f(pi.r.z, pi.r.x))
+        {
+            float d {2.0f};
+            glm::vec3 A  {pi.r.z, pi.r.x, pi.r.y};
+            glm::vec3 Ax {A.x + d, A.y, d * fx(A.x, A.y)};
+            glm::vec3 Ay {A.x, A.y + d, d * fy(A.x, A.y)};
+            glm::vec3 Dp {glm::normalize(glm::cross(Ax - A, Ay - A))};
+
+            pi.v += gil::Vec3f{Dp.y, Dp.z, Dp.x} * sim.damping;
+            pi.r.y = f(pi.r.z, pi.r.x) + sim.margin;
+        }
+        */
+
+        // Perpendicular Method
+        /*
+        if(pi.r.y - sim.margin < f(pi.r.z, pi.r.x))
+        {
+            float d {2.0f};
+            glm::vec3 A  {pi.r.z, pi.r.x, pi.r.y};
+            glm::vec3 Ax {A.x + d, A.y, d * fx(A.x, A.y)};
+            glm::vec3 Ay {A.x, A.y + d, d * fy(A.x, A.y)};
+            glm::vec3 Dp {glm::normalize(glm::cross(Ay - A, Ax - A))};
+
+            pi.v = gil::Vec3f{Dp.y, Dp.z, Dp.x} * sim.damping;
+            pi.r.y = f(pi.r.z, pi.r.x) + sim.margin;
+        }
+        */
+
+        // Gradient Method
+        /*
+        if(pi.r.y - sim.margin < f(pi.r.z, pi.r.x))
+        {
+            float d {2.0f};
+            gil::Vec3f gradientVector {fy(pi.r.z, pi.r.x), 0.0f, fx(pi.r.z, pi.r.x)};
+
+            pi.v = gil::normalize(gradientVector) * sim.damping;
+            pi.r.y = f(pi.r.z, pi.r.x) + sim.margin;
+        }
+        */
+
+        // Box Method
 
         if(pi.r.x - sim.margin < 0.0f)
         {
@@ -90,29 +169,32 @@ void eulerIntegrate(SIM_State& sim)
             pi.v.z *= sim.damping;
             pi.r.z = sim.boundaryDepth - sim.margin;
         }
+
     }
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // Init Functions
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-void initGLParams(const SIM_State& sim, const gil::RenderingWindow& window, gil::Shader& shader)
+void initGLParams(const SIM_State& sim, const gil::RenderingWindow& window, gil::Shader& particleShader, gil::Shader& volcanoShader, const glm::vec3& viewPos)
 {
-    shader.use();
-
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_PROGRAM_POINT_SIZE);
     glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
-    shader.setFloat("pointSize", 32.0f);
 
-    //glm::vec3 viewPos {1.0f, 1.0f, 2.0f};
-    glm::vec3 viewPos {0.4f, 0.8f, 1.6f};
     glm::mat4 view = glm::lookAt(viewPos, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
     glm::mat4 projection = glm::perspective(45.0f, window.getAspectRatio(), 0.1f, 1000.0f);
-    shader.setMat4("view", view);
-    shader.setMat4("projection", projection);
-    shader.setVec3("particleColor", {1.0f, 0.13f, 0.0f});
+
+    particleShader.use();
+    particleShader.setMat4("view", view);
+    particleShader.setMat4("projection", projection);
+    particleShader.setVec3("particleColor", {1.0f, 0.13f, 0.0f});
+
+    volcanoShader.use();
+    volcanoShader.setMat4("view", view);
+    volcanoShader.setMat4("projection", projection);
+    gil::setupDefaultLights(volcanoShader, viewPos);
 }
 
 void initSPH(SIM_State& sim)
@@ -141,6 +223,9 @@ void initSPH(SIM_State& sim)
 			}
 		}
 	}
+    sim.boundaryWidth  *= 2.0f;
+    sim.boundaryHeight *= 2.0f;
+    sim.boundaryDepth  *= 2.0f;
     sim.stride = 6;
 
     glGenVertexArrays(1, &sim.VAO);
@@ -173,6 +258,17 @@ int main()
         return EXIT_FAILURE;
     }
 
+    gil::InputControl yRot;
+
+    gil::EventHandler eventHandler;
+    eventHandler.addKeyControl(gil::KEY_A, yRot, -1.0f);
+    eventHandler.addKeyControl(gil::KEY_D, yRot,  1.0f);
+
+    window.setEventHandler(eventHandler);
+
+    float yRotationAngle  {0};
+    float yRotationWeight {1.0f};
+
     SIM_State sim;
 
     sim.timeStep = 0.01f;
@@ -193,8 +289,17 @@ int main()
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
     gil::Timer timer(true);
 
+    //glm::vec3 viewPos {1.0f, 1.0f, 2.0f};
+    glm::vec3 viewPos {0.4f, 0.8f, 1.6f};
+    //glm::vec3 viewPos {4.0f, 8.0f, 16.0f};
+
     gil::Shader shader("shader");
-    initGLParams(sim, window, shader);
+    gil::Shader volcanoShader("volcano");
+    initGLParams(sim, window, shader, volcanoShader, viewPos);
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    gil::Model volcano("models/volcano.obj", nullptr, true, false);
+    glm::vec3 volcanoPos {0.0f, -2.0f, 0.0f};
 
     while(window.isActive())
     {
@@ -245,7 +350,7 @@ int main()
 
                 if(gil::module(r) < sim.supportRadius)
                 {
-                    pressureForce  += ((pi.pressure / pow(pi.density, 2)) + (pj.pressure / pow(pj.density, 2))) * sim.mass * spikyGradientKernel(r, sim.supportRadius);
+                    pressureForce  += ((pi.pressure / SQD(pi.density)) + (pj.pressure / SQD(pj.density))) * sim.mass * spikyGradientKernel(r, sim.supportRadius);
                     viscosityForce += (pj.v - pi.v) * (sim.mass / pj.density) * viscosityLaplacianKernel(r, sim.supportRadius);
                 }
             }
@@ -259,17 +364,31 @@ int main()
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         // Integrate by Euler 1th Order
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-        timer.getDeltaTime();
         eulerIntegrate(sim);
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         // Render
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-        shader.use();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glm::mat4 view;
         glm::mat4 model;
+
+        float deltaTime = timer.getDeltaTime();
+        yRotationAngle += yRot.getMagnitude() * yRotationWeight * deltaTime;
+        glm::vec4 nvp4 = glm::rotate(glm::mat4(1.0f), yRotationAngle, glm::vec3{0.0f, 1.0f, 0.0f}) * glm::vec4{viewPos.x, viewPos.y, viewPos.z, 1.0f};
+        glm::vec3 nvp3 = {nvp4.x, nvp4.y, nvp4.z};
+        view = glm::lookAt(nvp3, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
+
+        model = glm::translate(glm::mat4(1.0f), volcanoPos);
+        volcanoShader.use();
+        volcanoShader.setMat4("view", view);
+        volcanoShader.setMat4("model", model);
+        volcano.draw(volcanoShader);
+
+        shader.use();
+        shader.setMat4("view", view);
         for(unsigned int i = 0; i < sim.particles.size(); ++i)
         {
             Particle& pi = sim.particles[i];
