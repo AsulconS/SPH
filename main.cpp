@@ -68,7 +68,7 @@ float viscosityLaplacianKernel(const gil::Vec3f r, const float h)
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 float f(const float x, const float y)
 {
-    return (sin(2.0f * sqrt(SQD(x) + SQD(y))) / sqrt(SQD(x) + SQD(y))) - 2.0f;
+    return 1.5f * (sin(2.0f * sqrt(SQD(x) + SQD(y))) / sqrt(SQD(x) + SQD(y))) - 2.0f;
 }
 
 float fx(const float x, const float y)
@@ -306,7 +306,7 @@ int main()
 
     //glm::vec3 viewPos {1.0f, 1.0f, 2.0f};
     //glm::vec3 viewPos {0.4f, 0.8f, 1.6f};
-    glm::vec3 viewPos {4.0f, 8.0f, 16.0f};
+    glm::vec3 viewPos {2.0f, 4.0f, 8.0f};
 
     gil::Shader shader("shader");
     gil::Shader volcanoShader("volcano");
@@ -408,6 +408,7 @@ int main()
         view = glm::lookAt(nvp3, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
 
         model = glm::translate(glm::mat4(1.0f), volcanoPos);
+        model = glm::scale(model, glm::vec3{1.0f, 1.5f, 1.0f});
         volcanoShader.use();
         volcanoShader.setMat4("view", view);
         volcanoShader.setMat4("model", model);
