@@ -124,7 +124,6 @@ void initGLParams(const SIM_State& sim, const gil::RenderingWindow& window, gil:
     particleShader.use();
     particleShader.setMat4("view", view);
     particleShader.setMat4("projection", projection);
-    particleShader.setVec3("particleColor", {1.0f, 0.13f, 0.0f});
 
     volcanoShader.use();
     volcanoShader.setMat4("view", view);
@@ -151,9 +150,9 @@ void initSPH(SIM_State& sim)
                 sim.vertexData.push_back(0.0f);
                 sim.vertexData.push_back(0.0f);
                 // Colors
-                sim.vertexData.push_back(1.0f);
-                sim.vertexData.push_back(0.13f);
                 sim.vertexData.push_back(0.0f);
+                sim.vertexData.push_back(0.5f);
+                sim.vertexData.push_back(1.0f);
 			}
 		}
 	}
@@ -186,7 +185,7 @@ void initSPH(SIM_State& sim)
 
 int main()
 {
-    gil::RenderingWindow window {800, 600, "SPH"};
+    gil::RenderingWindow window {1600, 900, "SPH"};
     if(!window.isReady())
     {
         return EXIT_FAILURE;
@@ -226,9 +225,9 @@ int main()
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
     gil::Timer timer(true);
 
-    glm::vec3 viewPos {0.4f, 0.8f, 1.6f};
+    glm::vec3 viewPos {0.2f, 0.4f, 0.8f};
 
-    gil::Shader shader("shader");
+    gil::Shader shader("water");
     gil::Shader volcanoShader("volcano");
     initGLParams(sim, window, shader, volcanoShader, viewPos);
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
