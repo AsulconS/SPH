@@ -90,11 +90,11 @@ void leapFrogIntegrate(SIM_State& sim)
             pi.v.y *= sim.damping;
             pi.r.y = sim.margin;
         }
-        if(pi.r.y + sim.margin > sim.boundaryHeight)
+        /*if(pi.r.y + sim.margin > sim.boundaryHeight)
         {
             pi.v.y *= sim.damping;
             pi.r.y = sim.boundaryHeight - sim.margin;
-        }
+        }*/
         if(pi.r.z - sim.margin < 0.0f)
         {
             pi.v.z *= sim.damping;
