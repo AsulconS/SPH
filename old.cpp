@@ -2,6 +2,7 @@
 #include <particle.hpp>
 
 #include <random>
+#include <iostream>
 
 #define SCALE_FACTOR 10.0f
 

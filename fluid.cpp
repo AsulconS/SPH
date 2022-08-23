@@ -1,6 +1,7 @@
 #include <HSGIL/hsgil.hpp>
 
 #include <vector>
+#include <iostream>
 
 #include <particle.hpp>
 
@@ -191,14 +192,10 @@ int main()
         return EXIT_FAILURE;
     }
 
-    gil::InputControl yRot;
+    gil::InputHandler inputHandler;
+    window.setInputHandler(inputHandler);
 
-    gil::EventHandler eventHandler;
-    eventHandler.addKeyControl(gil::KEY_A, yRot, -1.0f);
-    eventHandler.addKeyControl(gil::KEY_D, yRot,  1.0f);
-
-    window.setEventHandler(eventHandler);
-
+    float yRotControl     {0.0f};
     float yRotationAngle  {0.0f};
     float yRotationWeight {1.0f};
 
@@ -238,6 +235,19 @@ int main()
     while(window.isActive())
     {
         window.pollEvents();
+
+        // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+        // Input Processing
+        // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+        yRotControl = 0.0f;
+        if(inputHandler.onKeyDown(gil::KEY_A))
+        {
+            yRotControl -= 1.0f;
+        }
+        if(inputHandler.onKeyDown(gil::KEY_D))
+        {
+            yRotControl += 1.0f;
+        }
 
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         // Compute Mass-Density and Pressure
@@ -321,7 +331,7 @@ int main()
         glm::mat4 model;
 
         float deltaTime = timer.getDeltaTime();
-        yRotationAngle += yRot.getMagnitude() * yRotationWeight * deltaTime;
+        yRotationAngle += yRotControl * yRotationWeight * deltaTime;
         glm::vec4 nvp4 = glm::rotate(glm::mat4(1.0f), yRotationAngle, glm::vec3{0.0f, 1.0f, 0.0f}) * glm::vec4{viewPos.x, viewPos.y, viewPos.z, 1.0f};
         glm::vec3 nvp3 = {nvp4.x, nvp4.y, nvp4.z};
         view = glm::lookAt(nvp3, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
