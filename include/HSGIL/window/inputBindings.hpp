@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -61,7 +61,7 @@ enum InputCode
 
     KEY_SELECT       = 0x029,
     KEY_PRINT        = 0x02A,
-    KEY_EXECUTE      = 0x02B,
+    //KEY_EXECUTE      = 0x02B,
     KEY_PRINT_SCREEN = 0x02C,
 
     KEY_INSERT = 0x02D,
@@ -218,24 +218,22 @@ enum InputCode
     KEY_NUMPAD_ENTER = 0x03D,
     KEY_NUMPAD_EQUAL = 0x03E,
 
-// Form Buttons from 0x040 to 0x0A4
+// Mouse Extra Buttons
 
-    BUTTON_000 = 0x040,
-    BUTTON_001 = 0x041,
-    BUTTON_002 = 0x042,
-    BUTTON_003 = 0x043,
-    BUTTON_004 = 0x044,
-    BUTTON_005 = 0x045,
-    BUTTON_006 = 0x046,
-    BUTTON_007 = 0x047,
-    BUTTON_008 = 0x048,
-    BUTTON_009 = 0x049,
-    BUTTON_010 = 0x04A,
-    BUTTON_011 = 0x04B,
+    MOUSE_BUTTON_TURN_WHEEL_UP    = 0x140,
+    MOUSE_BUTTON_TURN_WHEEL_DOWN  = 0x141,
+    MOUSE_BUTTON_PUSH_WHEEL_LEFT  = 0x142,
+    MOUSE_BUTTON_PUSH_WHEEL_RIGHT = 0x143,
+
+    MOUSE_BUTTON_04 = 0x144,
+    MOUSE_BUTTON_05 = 0x145,
 
 // --------------------------------
 
 // Aliases
+
+    MOUSE_BUTTON_BACKWARDS = MOUSE_BUTTON_04,
+    MOUSE_BUTTON_FORWARDS  = MOUSE_BUTTON_05,
 
     KEY_RETURN = KEY_ENTER,
     KEY_MENU   = KEY_APPS,

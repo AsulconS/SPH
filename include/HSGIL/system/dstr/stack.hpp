@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -21,94 +21,116 @@
  *                                                                              *
  ********************************************************************************/
 
-#ifndef HSGIL_TIMER_HPP
-#define HSGIL_TIMER_HPP
+#ifndef HSGIL_DSTR_STACK_HPP
+#define HSGIL_DSTR_STACK_HPP
 
-#include <HSGIL/core/config.hpp>
-#include <HSGIL/core/common.hpp>
+#include <HSGIL/config/config.hpp>
+#include <HSGIL/config/common.hpp>
 
-#include <chrono>
-#include <iostream>
+#include <HSGIL/system/utility.hpp>
+
+#define HSGIL_STACK_DEFAULT_CAPACITY 16
 
 namespace gil
 {
-/**
- * @brief Timer Class that measures the time intervals, calculate Delta Time and other time stuff
- * 
- */
-class HSGIL_API Timer
+template <typename T>
+class Stack
 {
 public:
     /**
-     * @brief Construct a new Timer object
+     * @brief Construct a new Stack object
      * 
+     * @param t_capacity 
      */
-    explicit Timer(const bool t_debugMode = false, const float t_period = 1.0f);
-    /**
-     * @brief Destroy the Timer object
-     * 
-     */
-    virtual ~Timer();
+    Stack(uint64 t_capacity = HSGIL_STACK_DEFAULT_CAPACITY);
 
     /**
-     * @brief Update the timer
+     * @brief Construct a new Stack object
      * 
+     * @param o 
      */
-    void tick();
+    Stack(const Stack<T>& o);
     /**
-     * @brief Moves forward the second section of the timer
+     * @brief Construct a new Stack object
      * 
+     * @param o 
      */
-    void advance();
-    /**
-     * @brief Restart the timer
-     * 
-     */
-    void restart();
+    Stack(Stack<T>&& o);
 
     /**
-     * @brief Get the Total Frame count
+     * @brief Destroy the Stack object
      * 
-     * @return uint32 
      */
-    uint32 getTotalFrames();
+    virtual ~Stack();
+
     /**
-     * @brief Get the Frames Per Second count
+     * @brief C-Assigns a Stack to another
      * 
-     * @return uint32 
+     * @param o 
+     * @return Stack<T>& 
      */
-    uint32 getFramesPerSecond();
+    Stack<T>& operator=(const Stack<T>& o);
     /**
-     * @brief Get the Elapsed Time
+     * @brief M-Assigns a Stack to another
      * 
-     * @return float 
+     * @param o 
+     * @return Stack<T>& 
      */
-    float getTotalElapsedTime();
+    Stack<T>& operator=(Stack<T>&& o);
+
     /**
-     * @brief Get the Current Elapsed Time (relative to the current state)
+     * @brief Gets the size of the Stack
      * 
-     * @return float 
+     * @return uint64 
      */
-    float getCurrentElapsedTime();
+    uint64 size() const noexcept;
     /**
-     * @brief Get the Delta Time object
+     * @brief Returns a boolean indicating if Stack is empty or not
      * 
-     * @return float 
+     * @return true 
+     * @return false 
      */
-    float getDeltaTime();
+    bool empty() const noexcept;
+
+    /**
+     * @brief Returns a reference to access last element
+     * 
+     * @return T& 
+     */
+    T& top();
+    /**
+     * @brief Returns a constant reference to access last element
+     * 
+     * @return const T& 
+     */
+    const T& top() const;
+
+    /**
+     * @brief C-Pushes a new element to the Stack
+     * 
+     * @param val 
+     */
+    void push(const T& val);
+    /**
+     * @brief M-Pushes a new element to the Stack
+     * 
+     * @param val 
+     */
+    void push(T&& val);
+    /**
+     * @brief Drops the last element of the Stack
+     * 
+     */
+    void pop();
 
 private:
-    std::chrono::time_point<std::chrono::steady_clock> m_start;
-    std::chrono::time_point<std::chrono::steady_clock> m_currentStart;
-    std::chrono::time_point<std::chrono::steady_clock> m_lastTime;
-
-    uint32 m_totalFrames;
-    uint32 m_framesPerSecond;
-
-    float m_period;
-    bool  m_debugMode;
+    T* m_data;
+    uint64 m_size;
+    uint64 m_capacity;
 };
 
 } // namespace gil
 
-#endif // HSGIL_TIMER_HPP
+#include <HSGIL/system/dstr/stack.inl>
+
+#endif // HSGIL_DSTR_STACK_HPP

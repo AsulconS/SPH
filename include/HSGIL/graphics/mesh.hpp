@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -26,12 +26,12 @@
 
 #include <HSGIL/external/glm/glm.hpp>
 
-#include <HSGIL/core/config.hpp>
-#include <HSGIL/core/common.hpp>
-#include <HSGIL/core/dataStructures/vector.hpp>
+#include <HSGIL/config/config.hpp>
+#include <HSGIL/config/common.hpp>
+
+#include <HSGIL/system/dstr/vector.hpp>
 
 #include <HSGIL/graphics/shader.hpp>
-#include <HSGIL/graphics/gUtils.hpp>
 
 namespace gil
 {
@@ -79,8 +79,8 @@ protected:
     uint32 m_VBO;
     uint32 m_EBO;
 
-    Vector<uint32> m_indices;
-    Vector<float>  m_vertexData;
+    Vector<uint32>* m_indices;
+    Vector<float>* m_vertexData;
 };
 
 } // namespace gil

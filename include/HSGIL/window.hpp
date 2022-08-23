@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -24,20 +24,13 @@
 #ifndef HSGIL_WINDOW_I_HPP
 #define HSGIL_WINDOW_I_HPP
 
+#include <HSGIL/config/config.hpp>
+
 #include <HSGIL/window/inputEvents.hpp>
 #include <HSGIL/window/inputBindings.hpp>
+#include <HSGIL/window/inputHandler.hpp>
 
 #include <HSGIL/window/iWindow.hpp>
 #include <HSGIL/window/renderingWindow.hpp>
-#include <HSGIL/window/formWindow.hpp>
-#include <HSGIL/window/windowManager.hpp>
-#include <HSGIL/window/iInputControl.hpp>
-#include <HSGIL/window/iEventHandler.hpp>
-#include <HSGIL/window/inputControl.hpp>
-#include <HSGIL/window/inputTrigger.hpp>
-#include <HSGIL/window/inputButton.hpp>
-#include <HSGIL/window/eventHandler.hpp>
-
-#include <HSGIL/window/wUtils.hpp>
 
 #endif // HSGIL_WINDOW_I_HPP

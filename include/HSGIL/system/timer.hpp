@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -21,62 +21,82 @@
  *                                                                              *
  ********************************************************************************/
 
-#ifndef HSGIL_INPUT_TRIGGER_HPP
-#define HSGIL_INPUT_TRIGGER_HPP
+#ifndef HSGIL_TIMER_HPP
+#define HSGIL_TIMER_HPP
 
-#include <HSGIL/core/config.hpp>
-#include <HSGIL/core/common.hpp>
+#include <HSGIL/config/config.hpp>
+#include <HSGIL/config/common.hpp>
 
-#include <HSGIL/window/iInputControl.hpp>
+#include <HSGIL/system/time.hpp>
 
 namespace gil
 {
 /**
- * @brief InputTrigger Class that is an input controller that triggers
- * some accion once when pressed (no repeat) and can't do nothing until
- * it gets pressed again (i.e. exit key, 'once' keys).
+ * @brief Timer Class that measures the time intervals, calculate Delta Time and other time stuff
  * 
  */
-class HSGIL_API InputTrigger : public IInputControl
+class HSGIL_API Timer
 {
 public:
     /**
-     * @brief Construct a new InputTrigger object
+     * @brief Construct a new Timer object
      * 
      */
-    InputTrigger();
+    explicit Timer(const bool t_debugMode = false, const float t_period = 1.0f);
     /**
-     * @brief Destroy the InputTrigger object
+     * @brief Destroy the Timer object
      * 
      */
-    virtual ~InputTrigger();
+    virtual ~Timer();
 
     /**
-     * @brief Adds an amount to its magnitude
+     * @brief Update the timer
      * 
-     * @param amount 
      */
-    virtual void accum(const float amount) override;
+    void tick();
     /**
-     * @brief Get the Magnitude of the control
+     * @brief Restart the timer
+     * 
+     */
+    void restart();
+
+    /**
+     * @brief Get the Delta Time
      * 
      * @return float 
      */
-    virtual float getMagnitude() override;
-
+    secT getDeltaTime();
     /**
-     * @brief Checks once if the control has been triggered, then sets its flag to 1
-     * until its ammount makes 0 again
+     * @brief Get the Total Frame count
      * 
-     * @return true 
-     * @return false 
+     * @return uint32 
      */
-    bool isTriggered();
+    uint32 getTotalFrames();
+    /**
+     * @brief Get the Frames Per Second count
+     * 
+     * @return uint32 
+     */
+    uint32 getFramesPerSecond();
 
 private:
-    bool m_triggered;
+    secT procDeltaTime();
+    secT procTotalElapsedTime();
+    secT procCurrentElapsedTime();
+
+    microT m_start;
+    microT m_currentStart;
+    microT m_lastTime;
+
+    secT m_deltaTime;
+    secT m_currentTime;
+    uint32 m_totalFrames;
+    uint32 m_framesPerSecond;
+
+    secT m_period;
+    bool m_debugMode;
 };
 
 } // namespace gil
 
-#endif // HSGIL_INPUT_TRIGGER_HPP
+#endif // HSGIL_TIMER_HPP

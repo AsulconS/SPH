@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -21,26 +21,45 @@
  *                                                                              *
  ********************************************************************************/
 
-#ifndef HSGIL_W_UTILS_HPP
-#define HSGIL_W_UTILS_HPP
+#ifndef HSGIL_DSTR_EXCEPTION_HPP
+#define HSGIL_DSTR_EXCEPTION_HPP
 
-#include <HSGIL/core/config.hpp>
-#include <HSGIL/core/common.hpp>
-
-#include <cstring>
+#include <HSGIL/exception/genericException.hpp>
 
 namespace gil
 {
 /**
- * @brief Function that checks if an OpenGL extension is supported
+ * @brief DStr Generic Exception
  * 
- * @param extList 
- * @param extension 
- * @return true 
- * @return false 
  */
-HSGIL_API bool isExtensionSupported(const char* extList, const char* extension);
+class DStrException : public GenericException
+{
+public:
+    /**
+     * @brief Overridden method to know why exactly the DStr Exception was thrown
+     * 
+     * @return const char* 
+     */
+    virtual const char* what() const throw() override;
+};
+
+/**
+ * @brief Window Exception that is thrown when a Window can't initialize
+ * 
+ */
+class KeyNotFoundException : public DStrException
+{
+public:
+    /**
+     * @brief Overridden method to know why exactly the Exception was thrown
+     * 
+     * @return const char* 
+     */
+    virtual const char* what() const throw() override;
+};
 
 } // namespace gil
 
-#endif // HSGIL_W_UTILS_HPP
+#include <HSGIL/exception/system/dstrException.inl>
+
+#endif // HSGIL_DSTR_EXCEPTION_HPP

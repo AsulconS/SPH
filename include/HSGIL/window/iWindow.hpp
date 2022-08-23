@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -24,17 +24,15 @@
 #ifndef HSGIL_I_WINDOW_HPP
 #define HSGIL_I_WINDOW_HPP
 
-#include <HSGIL/core/config.hpp>
-#include <HSGIL/core/common.hpp>
+#include <HSGIL/config/config.hpp>
+#include <HSGIL/config/common.hpp>
 
-#include <HSGIL/window/windowManager.hpp>
-#include <HSGIL/window/iEventHandler.hpp>
-
-#include <string>
-#include <iostream>
+#include <HSGIL/window/inputHandler.hpp>
 
 namespace gil
 {
+class WindowManager;
+
 /**
  * @brief Window Class that handle a Window of the program
  * 
@@ -43,13 +41,14 @@ class HSGIL_API IWindow
 {
 public:
     /**
-     * @brief Construct a new Window object
+     * @brief Construct a new IWindow object
      * 
-     * @param t_title 
      * @param t_width 
      * @param t_height 
+     * @param t_title 
+     * @param t_eventHandler 
      */
-    IWindow(const uint32 t_width, const uint32 t_height, const char* t_title, IEventHandler* t_eventHandler) : m_width {t_width}, m_height {t_height}, m_title {t_title}, m_ready {false}, m_eventHandler {t_eventHandler} {}
+    IWindow(const uint32 t_width, const uint32 t_height, const char* t_title, InputHandler* t_inputHandler) : m_width {t_width}, m_height {t_height}, m_title {t_title}, m_ready {false}, m_inputHandler {t_inputHandler} {}
     /**
      * @brief Destroy the Window object
      * 
@@ -60,14 +59,14 @@ public:
      * @brief Check if the Window shouldn't close
      * 
      * @return true if the Window is active
-     * @return false if not
+     * @return false if the Windows is not active
      */
     virtual bool isActive() = 0;
     /**
      * @brief Check if the Window is able to start rendering
      * 
-     * @return true if right
-     * @return false if not
+     * @return true if the Window is able
+     * @return false if the Window is not able
      */
     virtual bool isReady() = 0;
     /**
@@ -77,10 +76,10 @@ public:
     virtual void close() = 0;
 
     /**
-     * @brief Set the Event Handler object
+     * @brief Set the Input Handler object
      * 
      */
-    virtual void setEventHandler(IEventHandler& t_eventHandler) = 0;
+    virtual void setInputHandler(InputHandler& t_inputHandler) = 0;
     /**
      * @brief Poll the Events to process the input
      * 
@@ -89,7 +88,7 @@ public:
     /**
      * @brief Get the Aspect Ratio
      * 
-     * @return float 
+     * @return float value containing the current aspect ratio
      */
     virtual float getAspectRatio() const = 0;
 
@@ -102,12 +101,12 @@ protected:
 
     uint32 m_width;
     uint32 m_height;
-    std::string m_title;
+    const char* m_title;
 
     bool m_ready;
 
+    InputHandler* m_inputHandler;
     WindowManager* m_windowManager;
-    IEventHandler* m_eventHandler;
 };
 
 } // namespace gil

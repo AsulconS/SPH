@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -24,14 +24,12 @@
 #ifndef HSGIL_VEC_ARITHMETIC_HPP
 #define HSGIL_VEC_ARITHMETIC_HPP
 
-#include <HSGIL/core/config.hpp>
-#include <HSGIL/core/common.hpp>
+#include <HSGIL/config/config.hpp>
+#include <HSGIL/config/common.hpp>
 
 #include <HSGIL/math/vec2.hpp>
 #include <HSGIL/math/vec3.hpp>
 #include <HSGIL/math/vec4.hpp>
-
-#include <cmath>
 
 namespace gil
 {

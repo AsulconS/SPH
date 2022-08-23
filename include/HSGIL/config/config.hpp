@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -21,32 +21,42 @@
  *                                                                              *
  ********************************************************************************/
 
-#ifndef HSGIL_COMMON_HPP
-#define HSGIL_COMMON_HPP
+#ifndef HSGIL_CONFIG_HPP
+#define HSGIL_CONFIG_HPP
 
-#include <cstdint>
+/**
+ * This defines the OS we are working with
+ * Currently: Linux and Windows
+ * Details: Deals with dynamic linking semantics
+ */
+#if defined(_WIN32) || defined(WIN32) || defined(_MSC_VER)
+    #define CF__HSGIL_OS_WINDOWS
+    #define CF__HSGIL_DLL_EXPORT __declspec(dllexport)
+    #define CF__HSGIL_DLL_IMPORT __declspec(dllimport)
+#elif defined(__unix__) || defined(linux) || defined(__GNUC__)
+    #define CF__HSGIL_OS_LINUX
+    #define CF__HSGIL_DLL_EXPORT __attribute__((visibility("default")))
+    #define CF__HSGIL_DLL_IMPORT
+#else
+    #define CF__HSGIL_OS_UNKNOWN
+    #define CF__HSGIL_DLL_EXPORT
+    #define CF__HSGIL_DLL_IMPORT
+    #pragma warning Unknown semantics for dynamic linking
+    #error HSGIL has no support for this OS
+#endif
 
-namespace gil
-{
-using int8   = int8_t;
-using int16  = int16_t;
-using int32  = int32_t;
-using int64  = int64_t;
-using uint8  = uint8_t;
-using uint16 = uint16_t;
-using uint32 = uint32_t;
-using uint64 = uint64_t;
+#if defined(C__HSGIL_SHARED_LIB)
+    #if defined(C__HSGIL_COMPILING)
+        #define HSGIL_API CF__HSGIL_DLL_EXPORT
+    #else
+        #define HSGIL_API CF__HSGIL_DLL_IMPORT
+    #endif
+#else
+    #define HSGIL_API
+#endif
 
-using byte   = uint8_t;
+#if defined(C__HSGIL_DEV_OPT_1)
+    #include <vld.h>
+#endif
 
-using Tag    = uint32_t;
-
-} // namespace gil
-
-namespace luis   = gil;
-namespace erick  = gil;
-namespace yober  = gil;
-namespace daryl  = gil;
-namespace anyelo = gil;
-
-#endif // HSGIL_COMMON_HPP
+#endif // HSGIL_CONFIG_HPP

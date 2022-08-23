@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -21,83 +21,35 @@
  *                                                                              *
  ********************************************************************************/
 
-#ifndef HSGIL_DSTR_VECTOR_HPP
-#define HSGIL_DSTR_VECTOR_HPP
+#ifndef HSGIL_COMMON_HPP
+#define HSGIL_COMMON_HPP
 
-#include <HSGIL/core/common.hpp>
-#include <HSGIL/core/utility.hpp>
+#include <cstdint>
 
-#define INITIAL_CAPACITY 4
+#define HSGIL_MAX_PATH_LENGTH 260
 
 namespace gil
 {
-template <typename T>
-class Vector
-{
-public:
-    explicit Vector();
-    explicit Vector(uint64 n);
+using int8   = int8_t;
+using int16  = int16_t;
+using int32  = int32_t;
+using int64  = int64_t;
+using uint8  = uint8_t;
+using uint16 = uint16_t;
+using uint32 = uint32_t;
+using uint64 = uint64_t;
 
-    Vector(uint64 n, const T& val);
+using secT   = float;
+using milliT = int32_t;
+using microT = int64_t;
 
-    Vector(const Vector<T>& o);
-    Vector(Vector<T>&& o);
-
-    virtual ~Vector();
-
-    Vector<T>& operator=(const Vector<T>& o);
-    Vector<T>& operator=(Vector<T>&& o);
-
-    /**
-     * @brief C-Pushes a new element at the end of the vector
-     * 
-     * @param val 
-     */
-    void push_back(const T& val);
-    /**
-     * @brief M-Pushes a new element at the end of the vector
-     * 
-     * @param val 
-     */
-    void push_back(T&& val);
-    /**
-     * @brief Gets a direct pointer to the raw data
-     * 
-     * @return T* 
-     */
-    T* data() noexcept;
-    /**
-     * @brief Gets a direct pointer to the raw data
-     * 
-     * @return const T* 
-     */
-    const T* data() const noexcept;
-    /**
-     * @brief Gets the size of the vector
-     * 
-     * @return uint64 
-     */
-    uint64 size() const noexcept;
-    /**
-     * @brief Gets the capacity of the vector
-     * 
-     * @return uint64 
-     */
-    uint64 capacity() const noexcept;
-
-    T& operator[](uint64 n);
-    const T& operator[](uint64 n) const;
-
-private:
-    T* m_data;
-    uint64 m_size;
-    uint64 m_capacity;
-
-    void reallocate();
-};
+using byte = uint8_t;
 
 } // namespace gil
 
-#include <HSGIL/core/dataStructures/vector.inl>
+namespace luis  = gil;
+namespace erick = gil;
+namespace yober = gil;
+namespace pogdo = gil;
 
-#endif // HSGIL_DSTR_VECTOR_HPP
+#endif // HSGIL_COMMON_HPP

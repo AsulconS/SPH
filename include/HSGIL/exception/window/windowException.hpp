@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -73,9 +73,8 @@ public:
     virtual const char* what() const throw() override;
 };
 
-#include <HSGIL/exception/window/windowException.inl>
-
 } // namespace gil
 
-#endif // HSGIL_WINDOW_EXCEPTION_HPP
+#include <HSGIL/exception/window/windowException.inl>
 
+#endif // HSGIL_WINDOW_EXCEPTION_HPP

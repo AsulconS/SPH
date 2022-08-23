@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -21,46 +21,16 @@
  *                                                                              *
  ********************************************************************************/
 
-#ifndef HSGIL_I_INPUT_CONTROL_HPP
-#define HSGIL_I_INPUT_CONTROL_HPP
-
 namespace gil
 {
-/**
- * @brief IInputControl Interface that is just a input controller with a magnitude
- * 
- */
-class IInputControl
+inline const char* DStrException::what() const throw()
 {
-public:
-    /**
-     * @brief Construct a new IInputControl object
-     * 
-     */
-    IInputControl() : m_magnitude {0.0f} {}
-    /**
-     * @brief Destroy the IInputControl object
-     * 
-     */
-    virtual ~IInputControl() {}
+    return "gil::DStrException : Data Structure Exception";
+}
 
-    /**
-     * @brief Adds an amount to its magnitude
-     * 
-     * @param amount 
-     */
-    virtual void accum(const float amount) = 0;
-    /**
-     * @brief Get the Magnitude of the control
-     * 
-     * @return float 
-     */
-    virtual float getMagnitude() = 0;
-
-protected:
-    float m_magnitude;
-};
+inline const char* KeyNotFoundException::what() const throw()
+{
+    return "gil::KeyNotFoundException : Key Not Found in the container";
+}
 
 } // namespace gil
-
-#endif // HSGIL_I_INPUT_CONTROL_HPP

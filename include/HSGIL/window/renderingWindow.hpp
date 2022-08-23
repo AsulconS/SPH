@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -24,22 +24,17 @@
 #ifndef HSGIL_RENDERING_WINDOW_HPP
 #define HSGIL_RENDERING_WINDOW_HPP
 
-#include <HSGIL/core/config.hpp>
-#include <HSGIL/core/common.hpp>
-
-#include <HSGIL/exception/window/windowException.hpp>
+#include <HSGIL/config/config.hpp>
+#include <HSGIL/config/common.hpp>
 
 #include <HSGIL/window/iWindow.hpp>
 #include <HSGIL/window/inputEvents.hpp>
-#include <HSGIL/window/inputBindings.hpp>
-#include <HSGIL/window/windowManager.hpp>
-#include <HSGIL/window/iEventHandler.hpp>
-
-#include <string>
-#include <iostream>
+#include <HSGIL/window/inputHandler.hpp>
 
 namespace gil
 {
+struct WindowParams;
+
 /**
  * @brief Rendering Window Class that handle a window for render of the program
  * 
@@ -54,7 +49,7 @@ public:
      * @param t_width 
      * @param t_height 
      */
-    explicit RenderingWindow(const uint32 t_width = 800u, const uint32 t_height = 600u, const char* t_title = "Untitled", IEventHandler* t_eventHandler = nullptr);
+    explicit RenderingWindow(const uint32 t_width = 800u, const uint32 t_height = 600u, const char* t_title = "Untitled", InputHandler* t_inputHandler = nullptr);
     /**
      * @brief Destroy the RenderingWindow object
      * 
@@ -88,10 +83,10 @@ public:
     virtual void close() override;
 
     /**
-     * @brief Set the Event Handler object
+     * @brief Set the Input Handler object
      * 
      */
-    virtual void setEventHandler(IEventHandler& t_eventHandler) override;
+    virtual void setInputHandler(InputHandler& t_inputHandler) override;
     /**
      * @brief Poll the Events to process the input
      * 
@@ -117,10 +112,10 @@ private:
      * 
      * @param window 
      * @param event 
-     * @param keyCode 
+     * @param inputCode 
      * @param repeat 
      */
-    static void keyCallback(IWindow* window, InputEvent event, InputCode keyCode, bool repeat);
+    static void eventCallback(IWindow* window, InputEvent event, WindowParams* params);
 };
 
 } // namespace gil

@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -28,12 +28,14 @@ namespace gil
 {
 enum InputEvent
 {
-    KEY_RELEASED   = 0x0,
-    KEY_PRESSED    = 0x1,
+    KEY_RELEASED    = 0x0,
+    KEY_PRESSED     = 0x1,
+    BUTTON_PRESSED  = 0x2,
+    BUTTON_RELEASED = 0x3,
 
-    // Form Events
+    MOUSE_MOVE = 0x4,
 
-    BUTTON_PRESSED = 0x2
+    UNKNOWN_INPUT_EVENT = 0xFFF
 };
 
 } // namespace gil

@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -21,6 +21,8 @@
  *                                                                              *
  ********************************************************************************/
 
+namespace gil
+{
 inline const char* GraphicsException::what() const throw()
 {
     return "gil::GraphicsException : Graphics Exception";
@@ -30,3 +32,5 @@ inline const char* ShaderException::what() const throw()
 {
     return "gil::ShaderException : Shader failed to create";
 }
+
+} // namespace gil

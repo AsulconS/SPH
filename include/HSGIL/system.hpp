@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -21,31 +21,13 @@
  *                                                                              *
  ********************************************************************************/
 
-#ifndef HSGIL_CONSTANTS_HPP
-#define HSGIL_CONSTANTS_HPP
+#ifndef HSGIL_SYSTEM_I_HPP
+#define HSGIL_SYSTEM_I_HPP
 
-namespace gil
-{
-namespace constants
-{
-constexpr unsigned int FLOAT_PRECISION  { 7u };
-constexpr unsigned int DOUBLE_PRECISION { 15u };
+#include <HSGIL/config/config.hpp>
 
-// Float constants
+#include <HSGIL/system/time.hpp>
+#include <HSGIL/system/timer.hpp>
+#include <HSGIL/system/utility.hpp>
 
-constexpr float PI  { 3.1415927f };
-constexpr float E   { 2.7182818f };
-
-constexpr float GAL { 9.8066500f };
-
-// Double constants
-
-constexpr double PId  { 3.141592653589793 };
-constexpr double Ed   { 2.718281828459045 };
-
-constexpr double GALd { 9.806650000000000 };
-
-} // namespace constants
-} // namespace gil
-
-#endif // HSGIL_CONSTANTS_HPP
+#endif // HSGIL_SYSTEM_I_HPP

@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -21,51 +21,24 @@
  *                                                                              *
  ********************************************************************************/
 
-#ifndef HSGIL_INPUT_CONTROL_HPP
-#define HSGIL_INPUT_CONTROL_HPP
-
-#include <HSGIL/core/config.hpp>
-#include <HSGIL/core/common.hpp>
-
-#include <HSGIL/math/mUtils.hpp>
-
-#include <HSGIL/window/iInputControl.hpp>
+#ifndef HSGIL_UTILITY_HPP
+#define HSGIL_UTILITY_HPP
 
 namespace gil
 {
-/**
- * @brief InputControl Class that is an input controller with a magnitude
- * clamped between -1.0f and 1.0f, its aimed to be some axis or direction
- * handler (i.e. movement, rotation, physics).
- */
-class HSGIL_API InputControl : public IInputControl
-{
-public:
-    /**
-     * @brief Construct a new Input Control object
-     * 
-     */
-    InputControl();
-    /**
-     * @brief Destroy the Input Control object
-     * 
-     */
-    virtual ~InputControl();
+template <typename T> struct hsgil_remove_reference      { typedef T type; };
+template <typename T> struct hsgil_remove_reference<T&>  { typedef T type; };
+template <typename T> struct hsgil_remove_reference<T&&> { typedef T type; };
 
-    /**
-     * @brief Adds an amount to its magnitude
-     * 
-     * @param amount 
-     */
-    virtual void accum(const float amount) override;
-    /**
-     * @brief Get the Magnitude of the control
-     * 
-     * @return float 
-     */
-    virtual float getMagnitude() override;
-};
+template <typename T>
+inline typename hsgil_remove_reference<T>::type&& hsgil_move(T&& t) noexcept { return static_cast<typename hsgil_remove_reference<T>::type&&>(t); }
+
+template <typename T>
+inline T&& hsgil_forward(typename hsgil_remove_reference<T>::type& t) noexcept { return static_cast<T&&>(t); }
+
+template <typename T>
+inline T&& hsgil_forward(typename hsgil_remove_reference<T>::type&& t) noexcept { return static_cast<T&&>(t); }
 
 } // namespace gil
 
-#endif // HSGIL_INPUT_CONTROL_HPP
+#endif // HSGIL_UTILITY_HPP

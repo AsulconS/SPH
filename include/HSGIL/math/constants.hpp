@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -21,44 +21,32 @@
  *                                                                              *
  ********************************************************************************/
 
-#ifndef HSGIL_CONFIG_HPP
-#define HSGIL_CONFIG_HPP
+#ifndef HSGIL_CONSTANTS_HPP
+#define HSGIL_CONSTANTS_HPP
 
-/**
- * This defines the OS we are working with
- */
-#if defined(_WIN32) || defined(WIN32)
-    #define HSGIL_OS_WINDOWS
-#elif defined(__unix__) || defined(linux)
-    #define HSGIL_OS_LINUX
-#endif
+namespace gil
+{
+namespace constants
+{
+constexpr unsigned int FLOAT_PRECISION  { 7u };
+constexpr unsigned int DOUBLE_PRECISION { 15u };
 
-#if !defined(HSGIL_STATIC_BUILD)
-    #if defined(HSGIL_OS_WINDOWS)
-        #define HSGIL_API_EXPORT __declspec(dllexport)
-        #define HSGIL_API_IMPORT __declspec(dllimport)
+// Float constants
 
-        #if defined(_MSC_VER)
-            #pragma warning(disable : 4251)
-        #endif
-    #else
-        #if __GNU__ > 3
-            #define HSGIL_API_EXPORT __attribute__ ((__visibility__ ("default")))
-            #define HSGIL_API_IMPORT __attribute__ ((__visibility__ ("default")))
-        #else
-            #define HSGIL_API_EXPORT
-            #define HSGIL_API_IMPORT
-        #endif
-    #endif
-#else
-    #define HSGIL_API_EXPORT
-    #define HSGIL_API_IMPORT
-#endif
+constexpr float PI  { 3.1415927f };
+constexpr float E   { 2.7182818f };
 
-#if defined(HSGIL_EXPORT)
-    #define HSGIL_API HSGIL_API_EXPORT
-#else
-    #define HSGIL_API HSGIL_API_IMPORT
-#endif
+constexpr float GAL { 9.8066500f };
 
-#endif // HSGIL_CONFIG_HPP
+// Double constants
+
+constexpr double PId  { 3.141592653589793 };
+constexpr double Ed   { 2.718281828459045 };
+
+constexpr double GALd { 9.806650000000000 };
+
+} // namespace constants
+
+} // namespace gil
+
+#endif // HSGIL_CONSTANTS_HPP

@@ -1,7 +1,7 @@
 /********************************************************************************
  *                                                                              *
  * HSGIL - Handy Scalable Graphics Integration Library                          *
- * Copyright (c) 2020 Adrian Bedregal and Gabriela Chipana                      *
+ * Copyright (c) 2019-2022 Adrian Bedregal                                      *
  *                                                                              *
  * This software is provided 'as-is', without any express or implied            *
  * warranty. In no event will the authors be held liable for any damages        *
@@ -24,43 +24,15 @@
 namespace gil
 {
 template <typename T>
-inline Vector<T>::Vector()
-    : m_data     {nullptr},
-      m_size     {0},
-      m_capacity {INITIAL_CAPACITY}
+inline Stack<T>::Stack(uint64 t_capacity)
+    : m_size     {0},
+      m_capacity {t_capacity}
 {
     m_data = new T[m_capacity];
 }
 
 template <typename T>
-inline Vector<T>::Vector(uint64 n)
-    : m_data     {nullptr},
-      m_size     {n},
-      m_capacity {n}
-{
-    m_capacity |= (m_capacity >> 0x01);
-    m_capacity |= (m_capacity >> 0x02);
-    m_capacity |= (m_capacity >> 0x04);
-    m_capacity |= (m_capacity >> 0x08);
-    m_capacity |= (m_capacity >> 0x10);
-    m_capacity |= (m_capacity >> 0x20);
-    m_capacity += 0x01;
-
-    m_data = new T[m_capacity];
-}
-
-template <typename T>
-inline Vector<T>::Vector(uint64 n, const T& val)
-    : Vector {n}
-{
-    for(uint64 i = 0; i < m_size; ++i)
-    {
-        m_data[i] = val;
-    }
-}
-
-template <typename T>
-inline Vector<T>::Vector(const Vector<T>& o)
+inline Stack<T>::Stack(const Stack<T>& o)
     : m_size     {o.m_size},
       m_capacity {o.m_capacity}
 {
@@ -72,27 +44,22 @@ inline Vector<T>::Vector(const Vector<T>& o)
 }
 
 template <typename T>
-inline Vector<T>::Vector(Vector<T>&& o)
-    : m_size     {o.m_size},
+inline Stack<T>::Stack(Stack<T>&& o)
+    : m_data     {o.m_data},
+      m_size     {o.m_size},
       m_capacity {o.m_capacity}
 {
-    m_data = o.m_data;
-
     o.m_data = nullptr;
-    o.m_size = 0;
-    o.m_capacity = INITIAL_CAPACITY;
-
-    o.m_data = new T[o.m_capacity];
 }
 
 template <typename T>
-inline Vector<T>::~Vector()
+inline Stack<T>::~Stack()
 {
     delete[] m_data;
 }
 
 template <typename T>
-inline Vector<T>& Vector<T>::operator=(const Vector<T>& o)
+inline Stack<T>& Stack<T>::operator=(const Stack<T>& o)
 {
     delete[] m_data;
 
@@ -109,90 +76,71 @@ inline Vector<T>& Vector<T>::operator=(const Vector<T>& o)
 }
 
 template <typename T>
-inline Vector<T>& Vector<T>::operator=(Vector<T>&& o)
+inline Stack<T>& Stack<T>::operator=(Stack<T>&& o)
 {
     delete[] m_data;
 
+    m_data = o.m_data;
     m_size = o.m_size;
     m_capacity = o.m_capacity;
 
-    m_data = o.m_data;
-
     o.m_data = nullptr;
-    o.m_size = 0;
-    o.m_capacity = INITIAL_CAPACITY;
-
-    o.m_data = new T[o.m_capacity];
 
     return (*this);
 }
 
 template <typename T>
-inline void Vector<T>::push_back(const T& val)
-{
-    if(m_size >= m_capacity)
-    {
-        reallocate();
-    }
-    m_data[m_size++] = val;
-}
-
-template <typename T>
-inline void Vector<T>::push_back(T&& val)
-{
-    if(m_size >= m_capacity)
-    {
-        reallocate();
-    }
-    m_data[m_size++] = hsgil_move(val);
-}
-
-template <typename T>
-inline T* Vector<T>::data() noexcept
-{
-    return m_data;
-}
-
-template <typename T>
-inline const T* Vector<T>::data() const noexcept
-{
-    return m_data;
-}
-
-template <typename T>
-inline uint64 Vector<T>::size() const noexcept
+inline uint64 Stack<T>::size() const noexcept
 {
     return m_size;
 }
 
 template <typename T>
-inline uint64 Vector<T>::capacity() const noexcept
+inline bool Stack<T>::empty() const noexcept
 {
-    return m_capacity;
+    return !m_size;
 }
 
 template <typename T>
-inline T& Vector<T>::operator[](uint64 n)
+inline T& Stack<T>::top()
 {
-    return m_data[n];
+    return m_data[m_size - 1];
 }
 
 template <typename T>
-inline const T& Vector<T>::operator[](uint64 n) const
+inline const T& Stack<T>::top() const
 {
-    return m_data[n];
+    return m_data[m_size - 1];
 }
 
 template <typename T>
-inline void Vector<T>::reallocate()
+inline void Stack<T>::push(const T& val)
 {
-    T* n_data = new T[m_capacity <<= 1];
-    for(uint64 i = 0; i < m_size; ++i)
+    if(m_size == m_capacity)
     {
-        n_data[i] = hsgil_move(m_data[i]);
+        return;
     }
-    delete[] m_data;
-    m_data = n_data;
+    m_data[m_size++] = val;
+}
+
+template <typename T>
+inline void Stack<T>::push(T&& val)
+{
+    if(m_size == m_capacity)
+    {
+        return;
+    }
+    m_data[m_size++] = hsgil_move(val);
+}
+
+template <typename T>
+inline void Stack<T>::pop()
+{
+    if(!m_size)
+    {
+        return;
+    }
+    --m_size;
 }
 
 } // namespace gil
