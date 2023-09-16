@@ -180,6 +180,9 @@ int main()
         return EXIT_FAILURE;
     }
 
+    gil::InputHandler inputHandler;
+    window.setInputHandler(inputHandler);
+
     SIM_State sim;
     sim.nParticles = 100000;
 
@@ -209,6 +212,11 @@ int main()
     while(window.isActive())
     {
         window.pollEvents();
+        if (inputHandler.onKeyTriggered(gil::KEY_ESCAPE))
+        {
+            window.close();
+            continue;
+        }
 
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         // Compute Density-Pressure

@@ -21,36 +21,17 @@
  *                                                                              *
  ********************************************************************************/
 
-#ifndef HSGIL_COMMON_HPP
-#define HSGIL_COMMON_HPP
-
-#include <cstdint>
-
-#define HSGIL_MAX_PATH_LENGTH 260
+#ifndef HSGIL_WINDOW_CUSTOMIZATION_HPP
+#define HSGIL_WINDOW_CUSTOMIZATION_HPP
 
 namespace gil
 {
-using int8   = int8_t;
-using int16  = int16_t;
-using int32  = int32_t;
-using int64  = int64_t;
-using uint8  = uint8_t;
-using uint16 = uint16_t;
-using uint32 = uint32_t;
-using uint64 = uint64_t;
-
-using secT   = float;
-using milliT = int32_t;
-using microT = int64_t;
-
-using byte = uint8_t;
+enum class WindowStyle {
+    WINDOWED_STYLE,
+    BORDERLESS_STYLE,
+    BORDERLESS_FULLSCREEN_STYLE
+};
 
 } // namespace gil
 
-namespace luis  = gil;
-namespace erick = gil;
-namespace yober = gil;
-namespace pogdo = gil;
-namespace zhong = gil;
-
-#endif // HSGIL_COMMON_HPP
+#endif // HSGIL_WINDOW_CUSTOMIZATION_HPP

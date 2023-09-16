@@ -223,6 +223,7 @@ int main()
     gil::Timer timer(true);
 
     glm::vec3 viewPos {0.2f, 0.4f, 0.8f};
+    glm::vec3 boundaries = glm::vec3{sim.boundaryWidth, sim.boundaryHeight, sim.boundaryDepth};
 
     gil::Shader shader("water");
     gil::Shader volcanoShader("volcano");
@@ -234,19 +235,28 @@ int main()
 
     while(window.isActive())
     {
+        // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+        // Pre Processing
+        // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         window.pollEvents();
+        if (inputHandler.onKeyTriggered(gil::KEY_ESCAPE))
+        {
+            window.close();
+            continue;
+        }
+        float deltaTime = timer.getDeltaTime();
 
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         // Input Processing
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         yRotControl = 0.0f;
-        if(inputHandler.onKeyDown(gil::KEY_A))
-        {
-            yRotControl -= 1.0f;
-        }
-        if(inputHandler.onKeyDown(gil::KEY_D))
+        if(inputHandler.onKeyDown(gil::KEY_Q))
         {
             yRotControl += 1.0f;
+        }
+        if(inputHandler.onKeyDown(gil::KEY_E))
+        {
+            yRotControl -= 1.0f;
         }
 
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -327,30 +337,23 @@ int main()
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 view;
-        glm::mat4 model;
-
-        float deltaTime = timer.getDeltaTime();
+        glm::mat4 model = glm::mat4(1.0f);
         yRotationAngle += yRotControl * yRotationWeight * deltaTime;
-        glm::vec4 nvp4 = glm::rotate(glm::mat4(1.0f), yRotationAngle, glm::vec3{0.0f, 1.0f, 0.0f}) * glm::vec4{viewPos.x, viewPos.y, viewPos.z, 1.0f};
-        glm::vec3 nvp3 = {nvp4.x, nvp4.y, nvp4.z};
-        view = glm::lookAt(nvp3, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
 
         shader.use();
-        shader.setMat4("view", view);
         for(unsigned int i = 0; i < sim.particles.size(); ++i)
         {
             Particle& pi = sim.particles[i];
 
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3{pi.r.x, pi.r.y, pi.r.z});
+            model = glm::rotate(glm::mat4(1.0f), yRotationAngle, glm::vec3{0.0f, 1.0f, 0.0f});
+            model = glm::translate(model, glm::vec3{pi.r.x, pi.r.y, pi.r.z} - 0.5f * boundaries);
             shader.setMat4("model", model);
 
             float zColorDepth {pi.r.z / sim.boundaryDepth};
             shader.setVec3("colorDepth", {zColorDepth, zColorDepth, zColorDepth});
 
             glBindVertexArray(sim.VAO);
-                glDrawArrays(GL_POINTS, 0, sim.particles.size());
+                glDrawArrays(GL_POINTS, 0, (GLsizei)sim.particles.size());
             glBindVertexArray(0);
         }
 

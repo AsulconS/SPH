@@ -316,6 +316,11 @@ int main()
     while(window.isActive())
     {
         window.pollEvents();
+        if (inputHandler.onKeyTriggered(gil::KEY_ESCAPE))
+        {
+            window.close();
+            continue;
+        }
 
         // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         // Input Processing
