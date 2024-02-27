@@ -26,74 +26,14 @@
 #include <HSGIL/config/config.hpp>
 #include <HSGIL/config/common.hpp>
 
-#include <HSGIL/system/time.hpp>
-
 namespace gil
 {
-/**
- * @brief Timer Class that measures the time intervals, calculate Delta Time and other time stuff
- * 
- */
-class HSGIL_API Timer
+namespace compat
 {
-public:
-    /**
-     * @brief Construct a new Timer object
-     * 
-     */
-    explicit Timer(const bool t_debugMode = false, const float t_period = 1.0f);
-    /**
-     * @brief Destroy the Timer object
-     * 
-     */
-    virtual ~Timer();
+#if defined(CF__HSGIL_OS_LINUX)
+HSGIL_API void forceGlxContextToVersion(const int major, const int minor);
+#endif
 
-    /**
-     * @brief Update the timer
-     * 
-     */
-    void tick();
-    /**
-     * @brief Restart the timer
-     * 
-     */
-    void restart();
-
-    /**
-     * @brief Get the Delta Time
-     * 
-     * @return float 
-     */
-    secT getDeltaTime();
-    /**
-     * @brief Get the Total Frame count
-     * 
-     * @return uint32 
-     */
-    uint32 getTotalFrames();
-    /**
-     * @brief Get the Frames Per Second count
-     * 
-     * @return uint32 
-     */
-    uint32 getFramesPerSecond();
-
-private:
-    secT procDeltaTime();
-    secT procTotalElapsedTime();
-    secT procCurrentElapsedTime();
-
-    microT m_start;
-    microT m_currentStart;
-    microT m_lastTime;
-
-    secT m_deltaTime;
-    secT m_currentTime;
-    uint32 m_totalFrames;
-    uint32 m_framesPerSecond;
-
-    secT m_period;
-    bool m_debugMode;
-};
+} // namespace compat
 
 } // namespace gil
